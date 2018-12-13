@@ -66,6 +66,10 @@
 </template>
 
 <script>
+  import axios from 'axios'
+
+  const booksApi = 'http://localhost:5000/api/v1/books'
+
   export default {
     data: () => ({
       headers: [
@@ -113,13 +117,46 @@
         this.errMsg = ''
       },
 
-      save() {
-        if (this.editedIndex > -1) { // 编辑
-          Object.assign(this.books[this.editedIndex], this.editedItem)
-        } else { // 新增
-          this.books.push(this.editedItem)
+      setErrMsg (errResponse) {
+        let errResMsg = errResponse.data.message
+        if (typeof errResMsg === 'string') {
+          this.errMsg = errResMsg
+        } else {
+          let errMsgs = []
+          let k
+          for (k in errResMsg) {
+            errMsgs.push('' + k + ' ' + errResMsg[k])
+          }
+          this.errMsg = errMsgs.join(',')
         }
-        this.close()
+      },
+      save() {
+        // if (this.editedIndex > -1) { // 编辑
+        //   Object.assign(this.books[this.editedIndex], this.editedItem)
+        // } else { // 新增
+        //   this.books.push(this.editedItem)
+        // }
+        // this.close()
+
+        if (this.editedIndex > -1) {
+          axios.put(booksApi + '/' + this.editedItem.id, this.editedItem)
+          .then(response => {
+            Object.assign(this.books[this.editedIndex], response.data)
+            this.close()
+          }).catch(error => {
+            this.setErrMsg(error.response)
+            console.log(error)
+          })
+        } else {
+          axios.post(booksApi, this.editedItem)
+            .then(response => {
+              this.books.push(response.data)
+              this.close()
+            }).catch(error => {
+            this.setErrMsg(error.response)
+            console.log(error)
+          })
+        }
       },
       editItem (item) {
         this.editedIndex = this.books.indexOf(item)
@@ -127,16 +164,33 @@
         this.dialog = true
       },
       deleteItem (item) {
+        // const index = this.books.indexOf(item)
+        // confirm('确认删除?') && this.books.splice(index, 1)
+
         const index = this.books.indexOf(item)
-        confirm('确认删除?') && this.books.splice(index, 1)
+        confirm('确认删除?') && axios.delete(booksApi + '/' + this.books[0].id)
+          .then(response => {
+            this.books.splice(index, 1)
+          }).catch(error => {
+            this.setErrMsg(error.response)
+            console.log(error)
+          })
       },
     },
     created () {
-      this.books = [
-        { name: '生死疲劳', category: '文学' },
-        { name: '国家宝藏', category: '人文社科' },
-        { name: '人类简史', category: '科技' },
-      ]
+      // this.books = [
+      //   { name: '生死疲劳', category: '文学' },
+      //   { name: '国家宝藏', category: '人文社科' },
+      //   { name: '人类简史', category: '科技' },
+      // ]
+
+      axios.get(booksApi)
+        .then(response => {
+          this.books = response.data
+        })
+        .catch(error => {
+          console.log(error)
+        })
     },
   }
 </script>

@@ -2,9 +2,11 @@
 
 from flask import Flask, request
 from flask_restful import Api, Resource, reqparse, abort
+from flask_cors import CORS
 
 
 app = Flask(__name__)
+CORS(app, resources={r"/api/*": {"origins": "*"}})
 api = Api(app)
 
 
@@ -38,7 +40,7 @@ class BookApi(Resource):
         self.reqparse.add_argument('name', type=not_empty_str, required=True, location='json')
         self.reqparse.add_argument('category', type=not_empty_str, required=True, location='json')
         super(BookApi, self).__init__()
-        
+
     def get(self, book_id):
         book = get_or_abort(book_id)
         return book
