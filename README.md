@@ -1,6 +1,6 @@
 # SPA Demo
 
-A simple SPA demo based on Vue and Flask.
+A simple SPA(Single Page Application) demo based on Vue and Flask.
 
 ## See code in different Stages
 
@@ -39,7 +39,7 @@ Run Frontend
 ```
 $ cd client
 $ npm install
-$ npm runserver
+$ npm run server
 ```
 
 # License
